@@ -1,0 +1,5 @@
+Problem link
+https://www.geeksforgeeks.org/practice-for-cracking-any-coding-interview/
+
+Array 
+1. https://www.geeksforgeeks.org/program-for-array-rotation-continued-reversal-algorithm/

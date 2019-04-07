@@ -4,10 +4,7 @@ import org.unnati.ds.DataStructureUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class BinaryTree {
     enum NodeSide{
@@ -53,7 +50,22 @@ public class BinaryTree {
             this.rightNode = rightNode;
         }
 
-        public Node(Object value) {
+         @Override
+         public boolean equals(Object o) {
+             if (this == o) return true;
+             if (o == null || getClass() != o.getClass()) return false;
+             Node node = (Node) o;
+             return Objects.equals(value, node.value) &&
+                     Objects.equals(leftNode, node.leftNode) &&
+                     Objects.equals(rightNode, node.rightNode);
+         }
+
+         @Override
+         public int hashCode() {
+             return Objects.hash(value, leftNode, rightNode);
+         }
+
+         public Node(Object value) {
             this.value = value;
         }
 
@@ -73,8 +85,26 @@ public class BinaryTree {
     private Node root;
     private int size=0;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BinaryTree that = (BinaryTree) o;
+        return Objects.equals(root, that.root);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(root);
+    }
+
     public BinaryTree(@NotNull  Object value){
         this.root=new Node(value);
+        size++;
+    }
+
+    public BinaryTree(@NotNull  Node value){
+        this.root=value;
         size++;
     }
 
@@ -107,6 +137,128 @@ public class BinaryTree {
         return level;
     }
 
+    public int getMaxWidth(){
+        if(this.root==null)
+            return 0;
+        int dia=0;
+        Queue<Node> queue=new LinkedList<Node>();
+        queue.add(this.root);
+        queue.add(null);
+        int tempDia=0;
+        while(!queue.isEmpty()){
+            Node node=queue.poll();
+            if(node!=null){
+                tempDia++;
+                if(node.leftNode!=null) queue.add(node.leftNode);
+                if(node.rightNode!=null) queue.add(node.rightNode);
+            }else{
+                if(queue.size()!=0){
+                    if(tempDia>dia)
+                        dia=tempDia;
+                    tempDia=0;
+                    queue.add(null);
+                }
+            }
+        }
+        return dia;
+    }
+
+    public int getHeight(){
+        return this.getDepth(this.root);
+    }
+
+    /**
+     *
+     * Get Diameter of the tree height(leftSubtree)+height(rightSubtree)+1
+     *
+     * */
+
+    public int getDiameter(){
+        return this.root==null ? 0 : this.getDepth(root.leftNode)+this.getDepth(root.rightNode)+1;
+    }
+
+    private int getDepth(Node node){
+        if(node==null)
+            return 0;
+        int leftSubTreeDepth=this.getDepth(node.leftNode);
+        int rightSubTreeDepth=this.getDepth(node.rightNode);
+        return (leftSubTreeDepth>rightSubTreeDepth ? leftSubTreeDepth:rightSubTreeDepth)+1;
+    }
+
+    /**
+     * Clone a Binary tree
+     *
+     * */
+    public BinaryTree clone(){
+        return new BinaryTree(this.cloneNode(this.root));
+    }
+
+    private Node cloneNode(Node node){
+        if(node==null)
+            return null;
+        Node clonedLeftNode=null;
+        Node clonedRightNode=null;
+        if(node.leftNode!=null){
+            clonedLeftNode=cloneNode(node.leftNode);
+        }
+        if(node.rightNode!=null){
+            clonedRightNode=cloneNode(node.rightNode);
+        }
+        Node clonedNode=new Node(node.value);
+        clonedNode.leftNode=clonedLeftNode;
+        clonedNode.rightNode=clonedRightNode;
+        return clonedNode;
+    }
+
+    /**
+     *  Nodes at kth distance
+     *
+     * */
+    public List<Node> getNodesAtDistance(int distance){
+        List<Node> list=new ArrayList<Node>();
+        this.getNodesAtDistance(this.root,distance,list);
+        return list;
+    }
+
+    private void getNodesAtDistance(Node node,int distance,List nodes){
+        if(node==null)
+            return;
+
+        if(distance==0)
+            nodes.add(node.getValue());
+        else{
+            getNodesAtDistance(node.leftNode,distance-1,nodes);
+            getNodesAtDistance(node.rightNode,distance-1,nodes);
+        }
+    }
+
+    /**
+     *
+     *  Print Ancestor
+     *
+     * */
+    public List<Node> getAncestor(Node searchKey){
+        if(searchKey==null || searchKey.value==null)
+            return new ArrayList<Node>();
+        List<Node> list=new ArrayList<Node>();
+        isAncestor(this.root,searchKey,list);
+        return list;
+    }
+
+    private boolean isAncestor(Node node,Node searchKey,List ancestors) {
+        if (node == null)
+            return false;
+        boolean isAncestor = false;
+        if (node.value.equals(searchKey.value)){
+            return true;
+        }else{
+           isAncestor= this.isAncestor(node.leftNode,searchKey,ancestors) ||   this.isAncestor(node.rightNode,searchKey,ancestors);
+           if(isAncestor){
+               ancestors.add(node.value);
+           }
+        }
+        return isAncestor;
+    }
 
     /***
      *
@@ -126,6 +278,67 @@ public class BinaryTree {
         list.add(node.getValue());
         inorder(node.getRightNode(),list);
     }
+
+    /***
+     *
+     * Depth First Search Inorder with Stack
+     *
+     * */
+    public List inorderWithStack(){
+        List list=new ArrayList();
+        Stack<Node> stack=new Stack();
+        Node node=this.getRoot();
+        if(node==null)
+            return list;
+        //stack.add(node);
+        this.pushNodes(node,stack);
+        while(!stack.empty()) {
+            node=stack.pop();
+            list.add(node.getValue());
+            this.pushNodes(node.getRightNode(),stack);
+        }
+        return list;
+    }
+
+    public void pushNodes(Node node,Stack stack){
+        while (node != null) {
+            stack.push(node);
+            node=node.getLeftNode();
+        }
+    }
+
+    /***
+     *
+     * Depth First Search Inorder with Threaded
+     *
+     * */
+    public List inorderWithThreadedTree(){
+        List list=new ArrayList();
+        Node node=this.getRoot();
+        if(node==null)
+            return list;
+        while(node!=null) {
+            if (node.getLeftNode() == null) {
+                list.add(node.getValue());
+                node = node.getRightNode();
+            } else {
+                Node pre = node.getLeftNode();
+                while (pre.getRightNode() != null && pre.rightNode != node)
+                    pre = pre.getRightNode();
+
+                if (pre.rightNode == node) {
+                    pre.rightNode = null;
+                    list.add(node.getValue());
+                    node=node.rightNode;
+                }else {
+                    pre.rightNode = node;
+                    node = node.leftNode;
+                }
+            }
+        }
+        return list;
+    }
+
 
     /***
      *

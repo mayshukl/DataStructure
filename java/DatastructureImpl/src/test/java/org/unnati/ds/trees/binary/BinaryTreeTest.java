@@ -53,10 +53,64 @@ public class BinaryTreeTest {
     }
 
     @Test
+    public void testGetHeight(){
+        Assert.assertEquals(3,binaryTree.getHeight());
+    }
+
+    @Test
+    public void testGetDiameter(){
+        Assert.assertEquals(5,binaryTree.getDiameter());
+    }
+
+    @Test
+    public void testGetWidth(){
+        Assert.assertEquals(2,binaryTree.getMaxWidth());
+    }
+
+    @Test
+    public void testGetNodesAtDistance(){
+        List list=new ArrayList();
+        list.add(8);list.add(10);
+        Assert.assertEquals(list,binaryTree.getNodesAtDistance(2));
+    }
+
+    @Test
+    public void testClone(){
+        BinaryTree clone=binaryTree.clone();
+        Assert.assertEquals(clone,binaryTree);
+    }
+
+    @Test
+    public void testGetAncestor(){
+        List list=new ArrayList();
+        list.add(4);list.add(5);
+        BinaryTree.Node node=new BinaryTree(8).getRoot();
+        Assert.assertEquals(list,binaryTree.getAncestor(node));
+    }
+
+    @Test
     public void testInorder(){
         List list=new ArrayList();
         list.add(4);list.add(8);list.add(5);list.add(10);list.add(6);
         List result=binaryTree.inorder();
+        Assert.assertEquals(list,result);
+
+    }
+
+    @Test
+    public void testInorderWithStack(){
+        List list=new ArrayList();
+        list.add(4);list.add(8);list.add(5);list.add(10);list.add(6);
+        List result=binaryTree.inorderWithStack();
+        Assert.assertEquals(list,result);
+
+    }
+
+    @Test
+    public void testInorderWithThreded(){
+        List list=new ArrayList();
+        list.add(4);list.add(8);list.add(5);list.add(10);list.add(6);
+        List result=binaryTree.inorderWithThreadedTree();
         Assert.assertEquals(list,result);
 
     }
